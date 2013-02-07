@@ -7,6 +7,7 @@ class Smackr
   class Room
     attr_reader :room
     attr_accessor :message_callback
+    attr_accessor :participant_callback
     attr_accessor :messages
 
     def initialize(opts={})
@@ -29,6 +30,7 @@ class Smackr
       @room = MultiUserChat.new(opts[:connection], opts[:roomname]);
       @room.join(opts[:nickname], opts[:password], history, SmackConfiguration.get_packet_reply_timeout());
       @room.add_message_listener(PacketReceiver.new(:room => self))
+      @room.add_participant_listener(ParticipantReceiver.new(:room => self))
     end
 
     def send_message(msg)
@@ -50,6 +52,20 @@ class Smackr
       def process_packet(packet)
         room.messages << packet
         room.message_callback.call(packet, room.room) if room.message_callback
+      end
+    end
+
+    class ParticipantReceiver
+      include org.jivesoftware.smack.PacketListener
+      attr_accessor :room
+
+      def initialize(opts={})
+        self.room = opts[:room]
+      end
+
+      def process_packet(packet)
+        room.messages << packet
+        room.participant_callback.call(packet, room.room) if room.participant_callback
       end
     end
   end
