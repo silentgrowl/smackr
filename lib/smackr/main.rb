@@ -61,7 +61,7 @@ private
     unless self.xmpp_connection.is_connected
       @xmpp_connection.connect
       if self.username
-        @xmpp_connection.login(self.username, self.password) #, self.resource)
+        @xmpp_connection.login(self.username, self.password, self.resource)
       else
         @xmpp_connection.login_anonymously
       end
